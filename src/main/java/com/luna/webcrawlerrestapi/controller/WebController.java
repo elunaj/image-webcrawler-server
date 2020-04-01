@@ -12,9 +12,8 @@ import org.springframework.web.bind.annotation.*;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
 
-
+@CrossOrigin(origins = {"*"}, exposedHeaders = {"Content-Disposition"})
 @RestController
-@CrossOrigin(value = {"*"}, exposedHeaders = {"Content-Disposition"})
 public class WebController {
 
     @GetMapping("/sample")
@@ -50,13 +49,14 @@ public class WebController {
         return response;
     }
 
-    @GetMapping("/download")
-    public ResponseEntity<byte[]> Download(@RequestBody WebsiteUrl image) {
+    @GetMapping(value="/download")
+    public ResponseEntity<byte[]> Download(@RequestParam(value="imageLink")
+                                                       String image) {
 
         //Service handler
         WebsiteUrlService service = new WebsiteUrlService();
 
-        String link = image.getLink();
+        String link = image;
 
         byte[] response = service.downloadImage(link);
         MediaType mediaType = service.processMediaType(link);
@@ -64,6 +64,11 @@ public class WebController {
         HttpHeaders header = new HttpHeaders();
         header.setContentType(mediaType);
         header.setContentLength(response.length);
+//        header.set("Access-Control-Allow-Origin", "*");
+//        header.set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
+//        header.set("Access-Control-Max-Age", "3600");
+//        header.set("Access-Control-Allow-Headers", "authorization, content-type, xsrf-token");
+//        header.set("Access-Control-Expose-Headers", "xsrf-token");
         header.set("Content-Disposition", "attachment; filename=" + link );
 
         return new ResponseEntity<>(response, header, HttpStatus.OK);
