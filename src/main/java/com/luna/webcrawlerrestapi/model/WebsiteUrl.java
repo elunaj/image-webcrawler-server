@@ -5,20 +5,23 @@ package com.luna.webcrawlerrestapi.model;
  *
  */
 
-import java.util.Objects;
-import java.util.concurrent.atomic.AtomicInteger;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.Document;
 
+import java.util.Objects;
+
+@Document(collection= "WebsiteUrl")
 public class WebsiteUrl {
 
-    //static id generator shared among all instances of Coordinates
-    private static final AtomicInteger idGenerator = new AtomicInteger(1);
+//    //static id generator shared among all instances of Coordinates
+//    private static final AtomicInteger idGenerator = new AtomicInteger(1);
 
-    private final Integer id;
+    @Id
+    private Integer id;
     private String imageTag; // holds either a "logo" or "image" value
     private String link; // holds urls for image
 
     public WebsiteUrl(String imageTag, String link) {
-        this.id = idGenerator.getAndIncrement();
         this.imageTag = imageTag;
         this.link = link;
     }

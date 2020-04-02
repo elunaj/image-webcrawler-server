@@ -1,11 +1,8 @@
 package com.luna.webcrawlerrestapi.controller;
 
-import com.luna.webcrawlerrestapi.model.PostRequest;
-import com.luna.webcrawlerrestapi.model.PostResponse;
-import com.luna.webcrawlerrestapi.model.SampleResponse;
 import com.luna.webcrawlerrestapi.model.WebsiteUrl;
 import com.luna.webcrawlerrestapi.service.WebsiteUrlService;
-import com.luna.webcrawlerrestapi.model.SampleResponse;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
 
@@ -16,14 +13,8 @@ import java.util.ArrayList;
 @RestController
 public class WebController {
 
-    @GetMapping("/sample")
-    public SampleResponse Sample(@RequestParam(value = "name",
-            defaultValue = "Robot") String name) {
-                    SampleResponse response = new SampleResponse();
-                    response.setId(1);
-                    response.setMessage("Your name is " + name);
-                    return response;
-    }
+    @Autowired
+    private WebsiteUrlService websiteUrlService;
 
     @GetMapping("/search")
     public ArrayList<WebsiteUrl> Search(@RequestParam(value = "url")
@@ -51,7 +42,7 @@ public class WebController {
 
     @GetMapping(value="/download")
     public ResponseEntity<byte[]> Download(@RequestParam(value="imageLink")
-                                                       String image) {
+                                                       String image) throws MalformedURLException{
 
         //Service handler
         WebsiteUrlService service = new WebsiteUrlService();
@@ -64,23 +55,19 @@ public class WebController {
         HttpHeaders header = new HttpHeaders();
         header.setContentType(mediaType);
         header.setContentLength(response.length);
-//        header.set("Access-Control-Allow-Origin", "*");
-//        header.set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
-//        header.set("Access-Control-Max-Age", "3600");
-//        header.set("Access-Control-Allow-Headers", "authorization, content-type, xsrf-token");
-//        header.set("Access-Control-Expose-Headers", "xsrf-token");
         header.set("Content-Disposition", "attachment; filename=" + link );
 
         return new ResponseEntity<>(response, header, HttpStatus.OK);
 
     }
 
-    @PostMapping("/test")
-    public PostResponse Test(@RequestBody PostRequest inputPayload) {
-        PostResponse response = new PostResponse();
-        response.setId(inputPayload.getId() * 100);
-        response.setMessage("Hello " + inputPayload.getName());
-        response.setExtra("Some text");
-        return response;
+    @GetMapping("/websiteurls")
+    public ArrayList<WebsiteUrl> getWebsiteUrls() {
+        return websiteUrlService.getWebsiteUrls();
+    }
+
+    @PostMapping
+    public WebsiteUrl postWebsiteUrl(@RequestBody WebsiteUrl websiteUrl) {
+        return websiteUrlService.createWebsiteUrl(websiteUrl);
     }
 }

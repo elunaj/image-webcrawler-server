@@ -1,10 +1,12 @@
 package com.luna.webcrawlerrestapi.service;
 
+import com.luna.webcrawlerrestapi.dao.WebsiteUrlDAO;
 import com.luna.webcrawlerrestapi.model.WebsiteUrl;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 
@@ -21,15 +23,16 @@ public class WebsiteUrlService {
     /**
      *
      */
+    @Autowired
+    private WebsiteUrlDAO websiteUrlDAO;
+
     // hashmap to hold image links for urls already searched
     private HashMap<String, ArrayList<WebsiteUrl>> links;
 
     // instantiate hashmap when class loads
     public WebsiteUrlService() {
-        links = new HashMap<String, ArrayList<WebsiteUrl>>();
+        this.links = new HashMap<String, ArrayList<WebsiteUrl>>();
     }
-
-//    private static final long serialVersionUID = 1L;
 
     //Method finds links in HTML page and calls findImages() for each
     public final ArrayList<String> findLinks(String url) {
@@ -71,7 +74,7 @@ public class WebsiteUrlService {
         ArrayList<WebsiteUrl> urlImages = new ArrayList<>();
         String websiteUrl = url;
 
-        if (!links.containsKey(websiteUrl)) {
+        if (!this.links.containsKey(websiteUrl)) {
             try {
                 //Connect to the website and get the html
                 Document doc = Jsoup.connect(websiteUrl)
@@ -113,7 +116,8 @@ public class WebsiteUrlService {
                 }
 
                 //add website url as hashmap key, and entire url array of tags/links
-                links.put(websiteUrl, urlImages);
+                this.links.put(websiteUrl, urlImages);
+                System.out.println("Added to map" + this.links);
 
             } catch (IOException e) {
                 e.printStackTrace();
@@ -122,7 +126,8 @@ public class WebsiteUrlService {
             // enter this else block if website already crawled
         } else {
             //return value(list of urls) for websiteUrl key
-            urlImages = links.get(websiteUrl);
+            urlImages = this.links.get(websiteUrl);
+            System.out.println("In map already" + this.links);
         }
 
         return urlImages;
@@ -179,4 +184,11 @@ public class WebsiteUrlService {
         return type;
     }
 
+    public ArrayList<WebsiteUrl> getWebsiteUrls() {
+        return websiteUrlDAO.getWebsiteUrls();
+    }
+
+    public WebsiteUrl createWebsiteUrl(WebsiteUrl websiteUrl) {
+        return websiteUrlDAO.createWebsiteUrl(websiteUrl);
+    }
 }
