@@ -1,21 +1,20 @@
 package com.luna.webcrawlerrestapi.service;
 
-import com.luna.webcrawlerrestapi.dao.WebsiteUrlDAO;
+import com.luna.webcrawlerrestapi.dao.RedisRepo;
 import com.luna.webcrawlerrestapi.model.WebsiteUrl;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 
 
 import java.io.*;
-import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.*;
 
 @Service
 public class WebsiteUrlService {
@@ -23,15 +22,10 @@ public class WebsiteUrlService {
     /**
      *
      */
-    @Autowired
-    private WebsiteUrlDAO websiteUrlDAO;
-
-    // hashmap to hold image links for urls already searched
-    private HashMap<String, ArrayList<WebsiteUrl>> links;
 
     // instantiate hashmap when class loads
     public WebsiteUrlService() {
-        this.links = new HashMap<String, ArrayList<WebsiteUrl>>();
+
     }
 
     //Method finds links in HTML page and calls findImages() for each
@@ -69,15 +63,16 @@ public class WebsiteUrlService {
     }
 
     //Implementation of Jsoup web crawl
-    public final ArrayList<WebsiteUrl> findImages(String url) {
+    public ArrayList<WebsiteUrl> findImages(String url) {
 
+        //return of urlImages
         ArrayList<WebsiteUrl> urlImages = new ArrayList<>();
-        String websiteUrl = url;
+        WebsiteUrl newUrl = null;
 
-        if (!this.links.containsKey(websiteUrl)) {
+        if (true) {
             try {
                 //Connect to the website and get the html
-                Document doc = Jsoup.connect(websiteUrl)
+                Document doc = Jsoup.connect(url)
                         .userAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.132 Safari/537.36")
                         .referrer("http://www.google.com")
                         .get();
@@ -95,10 +90,11 @@ public class WebsiteUrlService {
                         String src = el.absUrl("src");
 
                         //tag images deemed logos
-                        WebsiteUrl newUrl = new WebsiteUrl("logo", src);
+                        newUrl = new WebsiteUrl(url, src);
 
                         //add img url to return arraylist
                         urlImages.add(newUrl);
+//                       websiteUrlDAO.createWebsiteUrl(newUrl);
 
                     } else if (!el.attr("src").endsWith("gif") &&
                                     el.attr("src").toLowerCase().endsWith("jpg") ||
@@ -108,16 +104,20 @@ public class WebsiteUrlService {
                         String src = el.absUrl("src");
 
                         //tag non-logo images
-                        WebsiteUrl newUrl = new WebsiteUrl("image", src);
+                        newUrl = new WebsiteUrl(url, src);
 
                         //add img url to return arraylist
                         urlImages.add(newUrl);
+
                     }
                 }
 
                 //add website url as hashmap key, and entire url array of tags/links
-                this.links.put(websiteUrl, urlImages);
-                System.out.println("Added to map" + this.links);
+//                this.links.put(websiteUrl, urlImages);
+//                for (WebsiteUrl websiteUrl1 : urlImages) {
+//                    redisRepo.save(urlImages, websiteUrl1.getImageUrl());
+//                }
+//                System.out.println("Added to map" + this.links);
 
             } catch (IOException e) {
                 e.printStackTrace();
@@ -126,8 +126,9 @@ public class WebsiteUrlService {
             // enter this else block if website already crawled
         } else {
             //return value(list of urls) for websiteUrl key
-            urlImages = this.links.get(websiteUrl);
-            System.out.println("In map already" + this.links);
+//            urlImages = this.links.get(websiteUrl);
+//            System.out.println("In map already" + this.links);
+
         }
 
         return urlImages;
@@ -164,8 +165,6 @@ public class WebsiteUrlService {
 
             System.out.println("Image saved");
 
-        } catch (MalformedURLException e) {
-            e.printStackTrace();
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -184,11 +183,4 @@ public class WebsiteUrlService {
         return type;
     }
 
-    public ArrayList<WebsiteUrl> getWebsiteUrls() {
-        return websiteUrlDAO.getWebsiteUrls();
-    }
-
-    public WebsiteUrl createWebsiteUrl(WebsiteUrl websiteUrl) {
-        return websiteUrlDAO.createWebsiteUrl(websiteUrl);
-    }
 }

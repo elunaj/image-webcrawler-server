@@ -5,73 +5,60 @@ package com.luna.webcrawlerrestapi.model;
  *
  */
 
-import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.data.redis.core.RedisHash;
 
-import java.util.Objects;
+import java.io.Serializable;
 
-@Document(collection= "WebsiteUrl")
-public class WebsiteUrl {
+import java.util.Date;
 
-//    //static id generator shared among all instances of Coordinates
-//    private static final AtomicInteger idGenerator = new AtomicInteger(1);
+public class WebsiteUrl implements Serializable {
 
-    @Id
-    private Integer id;
-    private String imageTag; // holds either a "logo" or "image" value
-    private String link; // holds urls for image
+    private String id;
+    private String imageUrl; // holds either a "logo" or "image" value
+    private String imageLink; // holds urls for image
+    private Date deleteAt;
 
-    public WebsiteUrl(String imageTag, String link) {
-        this.imageTag = imageTag;
-        this.link = link;
+    public WebsiteUrl(String imageUrl, String imageLink) {
+        this.imageUrl = imageUrl;
+        this.imageLink = imageLink;
+        this.deleteAt = new Date();
     }
 
-    public Integer getId() {
+    public String getId() {
         return id;
     }
 
-    public String getImageTag() {
-        return imageTag;
+    public String getImageUrl() {
+        return imageUrl;
     }
 
-    public void setImageTag(String imageTag) {
-        this.imageTag = imageTag;
+    public void setImageUrl(String imageUrl) {
+        this.imageUrl = imageUrl;
     }
 
-    public String getLink() {
-        return link;
+    public String getImageLink() {
+        return imageLink;
     }
 
-    public void setLink(String link) {
-        this.link = link;
+    public void setImageLink(String imageLink) {
+        this.imageLink = imageLink;
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (o == null || getClass() != o.getClass()) {
-            return false;
-        }
-
-        WebsiteUrl websiteUrl = (WebsiteUrl) o;
-        return link == websiteUrl.link &&
-                Objects.equals(id, websiteUrl.id) &&
-                Objects.equals(imageTag, websiteUrl.imageTag);
+    public Date getDeleteAt() {
+        return deleteAt;
     }
 
-    @Override
-    public int hashCode() {
-        return Objects.hash(id, imageTag, link);
+    public void setDeleteAt(Date deleteAt) {
+        this.deleteAt = deleteAt;
     }
 
     @Override
     public String toString() {
         return "WebsiteUrl{" +
-                "id=" + id +
-                ", imageTag='" + imageTag + '\'' +
-                ", link='" + link + '\'' +
+                "id='" + id + '\'' +
+                ", imageUrl='" + imageUrl + '\'' +
+                ", imageLink='" + imageLink + '\'' +
+                ", deleteAt=" + deleteAt +
                 '}';
     }
 }

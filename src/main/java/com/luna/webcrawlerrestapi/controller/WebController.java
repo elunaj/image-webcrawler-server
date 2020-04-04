@@ -2,7 +2,7 @@ package com.luna.webcrawlerrestapi.controller;
 
 import com.luna.webcrawlerrestapi.model.WebsiteUrl;
 import com.luna.webcrawlerrestapi.service.WebsiteUrlService;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
 
@@ -13,9 +13,7 @@ import java.util.ArrayList;
 @RestController
 public class WebController {
 
-    @Autowired
-    private WebsiteUrlService websiteUrlService;
-
+    @Cacheable(value="images", key="#url")
     @GetMapping("/search")
     public ArrayList<WebsiteUrl> Search(@RequestParam(value = "url")
                                                     String url) {
@@ -31,11 +29,14 @@ public class WebController {
 
         //Calls method that finds all images on html page for every link in urlList
         for (String link : urlList) {
+
             ArrayList<WebsiteUrl> imageLinks = service.findImages(link);
 
             //Append image links to response list
             response.addAll(imageLinks);
         }
+
+        System.out.println("response" + response);
 
         return response;
     }
@@ -61,13 +62,4 @@ public class WebController {
 
     }
 
-    @GetMapping("/websiteurls")
-    public ArrayList<WebsiteUrl> getWebsiteUrls() {
-        return websiteUrlService.getWebsiteUrls();
-    }
-
-    @PostMapping
-    public WebsiteUrl postWebsiteUrl(@RequestBody WebsiteUrl websiteUrl) {
-        return websiteUrlService.createWebsiteUrl(websiteUrl);
-    }
 }
