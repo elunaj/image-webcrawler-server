@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.*;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
 
-@CrossOrigin(origins = {"http://localhost:3000/"}, exposedHeaders = {"Content-Disposition"})
+@CrossOrigin(origins = {"*"}, exposedHeaders = {"Content-Disposition"})
 @RestController
 public class WebController {
 
