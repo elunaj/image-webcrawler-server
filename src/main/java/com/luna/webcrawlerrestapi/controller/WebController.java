@@ -36,8 +36,6 @@ public class WebController {
             response.addAll(imageLinks);
         }
 
-        System.out.println("response" + response);
-
         return response;
     }
 
